@@ -2,8 +2,18 @@ import { useSearchParams } from "react-router";
 import { useProducts } from "@/hooks/useProducts";
 import ProductCard from "@/components/product/ProductCard";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "use-debounce";
+
+const categories = [
+  "smartphones",
+  "laptops",
+  "fragrances",
+  "skincare",
+  "groceries",
+  "home-decoration",
+];
 
 function ProductSkeleton() {
   return (
@@ -20,13 +30,17 @@ export default function Products() {
   const [params, setParams] = useSearchParams();
 
   const search = params.get("q") || "";
-
   const [debouncedSearch] = useDebounce(search, 500);
 
-  const { data, isLoading, error } = useProducts(debouncedSearch);
+  const category = params.get("category") || "";
+
+  const { data, isLoading, error } = useProducts({
+    search: debouncedSearch,
+    category,
+  });
 
   const handleSearch = (e) => {
-    setParams({ q: e.target.value });
+    setParams({ q: e.target.value, category });
   };
 
   if (isLoading) {
@@ -50,6 +64,28 @@ export default function Products() {
           value={search}
           onChange={handleSearch}
         />
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        {categories.map((cat) => (
+          <Button
+            key={cat}
+            variant={category === cat ? "default" : "outline"}
+            onClick={() =>
+              setParams({
+                q: search,
+                category: cat,
+              })
+            }
+          >
+            {cat}
+          </Button>
+        ))}
+
+        {/* Clear filter */}
+        <Button variant="ghost" onClick={() => setParams({ q: search })}>
+          All
+        </Button>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

@@ -1,7 +1,13 @@
-export async function fetchProducts(search = "") {
-  const url = search
-    ? `https://dummyjson.com/products/search?q=${search}`
-    : "https://dummyjson.com/products";
+export async function fetchProducts({ search = "", category = "" }) {
+  let url = "https://dummyjson.com/products";
+
+  if (search) {
+    url = `https://dummyjson.com/products/search?q=${search}`;
+  }
+
+  if (category) {
+    url = `https://dummyjson.com/products/category/${category}`;
+  }
 
   const res = await fetch(url);
 
