@@ -27,3 +27,13 @@ export async function fetchProductById(id) {
 
   return res.json();
 }
+
+export async function fetchCategories() {
+  const res = await fetch("https://dummyjson.com/products/categories");
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch categories");
+  }
+
+  return res.json();
+}

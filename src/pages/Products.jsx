@@ -1,10 +1,14 @@
 import { useSearchParams } from "react-router";
 import { useProducts } from "@/hooks/useProducts";
+import { useCategories } from "@/hooks/useCategories";
 import ProductCard from "@/components/product/ProductCard";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+
 import { useDebounce } from "use-debounce";
+
 import {
   Select,
   SelectContent,
@@ -13,14 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const categories = [
-  "smartphones",
-  "laptops",
-  "fragrances",
-  "skincare",
-  "groceries",
-  "home-decoration",
-];
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 function ProductSkeleton() {
   return (
@@ -40,7 +37,6 @@ export default function Products() {
   const [debouncedSearch] = useDebounce(search, 500);
 
   const category = params.get("category") || "";
-
   const sort = params.get("sort") || "";
 
   const { data, isLoading, error } = useProducts({
@@ -48,8 +44,11 @@ export default function Products() {
     category,
   });
 
+  const { data: categories } = useCategories();
+
   let products = data?.products || [];
 
+  // Sorting
   if (sort === "price-asc") {
     products = [...products].sort((a, b) => a.price - b.price);
   }
@@ -66,6 +65,18 @@ export default function Products() {
     setParams({ q: e.target.value, category, sort });
   };
 
+  const handleCategory = (value) => {
+    setParams({
+      q: search,
+      category: value,
+      sort,
+    });
+  };
+
+  const clearFilters = () => {
+    setParams({ q: search, sort });
+  };
+
   if (isLoading) {
     return (
       <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -76,77 +87,123 @@ export default function Products() {
     );
   }
 
+  if (error) return <p>Something went wrong</p>;
+
   if (!data?.products?.length) {
     return (
       <p className="text-center text-muted-foreground">No products found.</p>
     );
   }
 
-  if (error) return <p>Something went wrong</p>;
-
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold">Products</h1>
-      <div className="mb-6">
-        <Input
-          placeholder="Search products..."
-          value={search}
-          onChange={handleSearch}
-        />
-      </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        {categories.map((cat) => (
-          <Button
-            key={cat}
-            variant={category === cat ? "default" : "outline"}
-            onClick={() =>
-              setParams({
-                q: search,
-                category: cat,
-                sort,
-              })
-            }
-          >
-            {cat}
+      <div className="flex gap-8">
+        {/* Sidebar (Desktop) */}
+        <aside className="hidden w-64 space-y-6 lg:block">
+          <h2 className="text-lg font-semibold">Filters</h2>
+
+          <div className="space-y-2">
+            {categories?.map((cat) => {
+              const value = typeof cat === "string" ? cat : cat.slug;
+              const label = typeof cat === "string" ? cat : cat.name;
+
+              return (
+                <Button
+                  key={value}
+                  variant={category === value ? "default" : "outline"}
+                  className="w-full justify-start"
+                  onClick={() => handleCategory(value)}
+                >
+                  {label}
+                </Button>
+              );
+            })}
+          </div>
+
+          <Button variant="ghost" className="w-full" onClick={clearFilters}>
+            Clear filters
           </Button>
-        ))}
+        </aside>
 
-        {/* Clear filter */}
-        <Button variant="ghost" onClick={() => setParams({ q: search, sort })}>
-          All
-        </Button>
-      </div>
+        {/* Main Content */}
+        <div className="flex-1">
+          {/* Mobile Filters */}
+          <div className="mb-4 flex items-center justify-between lg:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline">Filters</Button>
+              </SheetTrigger>
 
-      <div className="mb-6 flex items-center justify-between">
-        {/* Search already here */}
+              <SheetContent side="left" className="w-64 space-y-6">
+                <h2 className="text-lg font-semibold">Filters</h2>
 
-        <Select
-          value={sort}
-          onValueChange={(value) =>
-            setParams({
-              q: search,
-              category,
-              sort: value,
-            })
-          }
-        >
-          <SelectTrigger className="w-45">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
+                {categories?.map((cat) => {
+                  const value = typeof cat === "string" ? cat : cat.slug;
+                  const label = typeof cat === "string" ? cat : cat.name;
 
-          <SelectContent>
-            <SelectItem value="price-asc">Price: Low → High</SelectItem>
-            <SelectItem value="price-desc">Price: High → Low</SelectItem>
-            <SelectItem value="rating-desc">Top Rated</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+                  return (
+                    <Button
+                      key={value}
+                      variant={category === value ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => handleCategory(value)}
+                    >
+                      {label}
+                    </Button>
+                  );
+                })}
 
-      <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={clearFilters}
+                >
+                  Clear filters
+                </Button>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Search + Sort */}
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <Input
+              placeholder="Search products..."
+              value={search}
+              onChange={handleSearch}
+              className="md:max-w-sm"
+            />
+
+            <Select
+              value={sort}
+              onValueChange={(value) =>
+                setParams({
+                  q: search,
+                  category,
+                  sort: value,
+                })
+              }
+            >
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="price-asc">Price: Low → High</SelectItem>
+                <SelectItem value="price-desc">Price: High → Low</SelectItem>
+                <SelectItem value="rating-desc">Top Rated</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Products Grid */}
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
