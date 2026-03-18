@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import CartContent from "@/components/cart/CartContent";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 import { useCartStore } from "@/store/cartStore";
 
@@ -17,7 +18,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-4">
           <Link to="/products">Products</Link>
-
+          <ThemeToggle />
           <Sheet>
             <SheetTrigger asChild>
               <Button>Cart ({cart.length})</Button>

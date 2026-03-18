@@ -4,8 +4,12 @@ import { BrowserRouter } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 import App from "./App.jsx";
+import { applyTheme } from "@/lib/theme";
 
 const queryClient = new QueryClient();
+const savedTheme = localStorage.getItem("theme") || "system";
+
+applyTheme(savedTheme);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
