@@ -13,7 +13,7 @@ applyTheme(savedTheme);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/online-store">
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
