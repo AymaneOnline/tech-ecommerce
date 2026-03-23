@@ -17,9 +17,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetTitle,
+  SheetDescription,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import { useEffect, useRef } from "react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 function ProductSkeleton() {
   return (
@@ -166,32 +173,38 @@ export default function Products() {
                 <Button variant="outline">Filters</Button>
               </SheetTrigger>
 
-              <SheetContent side="left" className="w-64 space-y-6">
-                <h2 className="text-lg font-semibold">Filters</h2>
+              <SheetContent side="left" className="w-64 p-4 pe-0 h-full">
+                <SheetTitle>Filters</SheetTitle>
+                <SheetDescription>
+                  <VisuallyHidden>
+                    Filter products by category or clear all filters.
+                  </VisuallyHidden>
+                </SheetDescription>
+                <div className="flex-1 flex flex-col overflow-y-auto pr-2 space-y-4">
+                  {categories?.map((cat) => {
+                    const value = typeof cat === "string" ? cat : cat.slug;
+                    const label = typeof cat === "string" ? cat : cat.name;
 
-                {categories?.map((cat) => {
-                  const value = typeof cat === "string" ? cat : cat.slug;
-                  const label = typeof cat === "string" ? cat : cat.name;
+                    return (
+                      <Button
+                        key={value}
+                        variant={category === value ? "default" : "outline"}
+                        className="w-full justify-start"
+                        onClick={() => handleCategory(value)}
+                      >
+                        {label}
+                      </Button>
+                    );
+                  })}
 
-                  return (
-                    <Button
-                      key={value}
-                      variant={category === value ? "default" : "outline"}
-                      className="w-full justify-start"
-                      onClick={() => handleCategory(value)}
-                    >
-                      {label}
-                    </Button>
-                  );
-                })}
-
-                <Button
-                  variant="ghost"
-                  className="w-full"
-                  onClick={clearFilters}
-                >
-                  Clear filters
-                </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={clearFilters}
+                  >
+                    Clear filters
+                  </Button>
+                </div>
               </SheetContent>
             </Sheet>
           </div>

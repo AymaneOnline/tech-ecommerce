@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { Star, ShoppingCart, Package } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -107,7 +108,13 @@ export default function ProductDetails() {
           <Button
             size="lg"
             className="flex items-center gap-2 w-full md:w-fit transition active:scale-95"
-            onClick={() => addToCart(product)}
+            onClick={() => {
+              addToCart(product);
+
+              toast("Added to cart", {
+                description: product.title,
+              });
+            }}
           >
             <ShoppingCart className="h-4 w-4" />
             Add to Cart

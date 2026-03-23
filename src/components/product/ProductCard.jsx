@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { Link } from "react-router";
+import { toast } from "sonner";
 
 export default function ProductCard({ product }) {
   const addToCart = useCartStore((state) => state.addToCart);
@@ -40,7 +41,13 @@ export default function ProductCard({ product }) {
         {/* Button */}
         <Button
           className="w-full transition active:scale-95"
-          onClick={() => addToCart(product)}
+          onClick={() => {
+            addToCart(product);
+
+            toast("Added to cart", {
+              description: product.title,
+            });
+          }}
         >
           Add to Cart
         </Button>
